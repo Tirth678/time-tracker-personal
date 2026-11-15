@@ -13,6 +13,7 @@ A personal timer for study sessions. Name what you are studying, start the clock
 - **Sessions**: type a name, then Start, Pause, Resume and End. The name can be changed while the timer runs.
 - **Pomodoro mode** (optional): focus rounds and breaks with lengths you choose, a chime when a phase ends, and a long break after a number of rounds. Only focus time counts as studied.
 - **Backgrounds**: five animated presets, or your own picture or video, uploaded from the device or given as a link. A video has a mute button, a volume slider and a dimmer.
+- **Focus music**: save a YouTube playlist to PostgreSQL and control play/pause, previous/next and mute from the dashboard.
 - **History**: every session by day, with delete.
 - **It keeps counting**: the timer survives reloads, closed tabs and a sleeping laptop. If a stopwatch ran unobserved for more than 30 minutes, the app asks whether that time should count.
 - **Works without a database**: sessions are then kept in the browser. Once a database is connected, they are uploaded and shared by all your devices. Sessions recorded while offline are uploaded when the connection returns.
@@ -117,6 +118,9 @@ The browser is the source of truth while a session runs. The timer is stored as 
 | `GET /api/sessions`        | Finished sessions, newest first. `?limit=` and `?cursor=` page them.  |
 | `POST /api/sessions`       | Save up to 200 finished sessions. Reports a result for each session.  |
 | `DELETE /api/sessions/:id` | Delete a session.                                                     |
+| `GET /api/playlist`        | Read the saved YouTube playlist.                                     |
+| `PUT /api/playlist`        | Save a YouTube playlist URL or id.                                  |
+| `DELETE /api/playlist`     | Remove the saved playlist.                                           |
 
 Without a database, the data routes answer `503` with the code `database_not_configured`.
 

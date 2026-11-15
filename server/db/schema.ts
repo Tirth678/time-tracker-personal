@@ -31,6 +31,12 @@ export const SCHEMA_SQL = `
 
   CREATE INDEX IF NOT EXISTS study_sessions_started_at_idx
     ON study_sessions (started_at DESC, id DESC);
+
+  CREATE TABLE IF NOT EXISTS music_playlist (
+    id          integer PRIMARY KEY CHECK (id = 1),
+    playlist_id text    NOT NULL CHECK (playlist_id <> ''),
+    updated_at  timestamptz NOT NULL DEFAULT now()
+  );
 `;
 
 /**

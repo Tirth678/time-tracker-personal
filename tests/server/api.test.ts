@@ -27,7 +27,7 @@ describe.each(TEST_BACKENDS)("API on $name", ({ create }) => {
   });
 
   beforeEach(async () => {
-    await db.query("TRUNCATE study_sessions");
+    await db.query("TRUNCATE study_sessions, music_playlist");
   });
 
   const app = () => createApp({ getStore: async () => store });
@@ -41,6 +41,28 @@ describe.each(TEST_BACKENDS)("API on $name", ({ create }) => {
       expect(res.body).toEqual({ ok: true, database: "connected" });
       expect(res.headers["cache-control"]).toBe("no-store");
       expect(res.headers["x-powered-by"]).toBeUndefined();
+    });
+
+    describe("playlist", () => {
+      it("stores, reads and removes a YouTube playlist", async () => {
+        expect((await request(app()).get("/api/playlist")).body).toBeNull();
+
+        const saved = await request(app())
+          .put("/api/playlist")
+          .send({ playlistUrl: "https://www.youtube.com/playlist?list=PL_focus_music_123" });
+        expect(saved.status).toBe(200);
+        expect(saved.body).toEqual({ playlistId: "PL_focus_music_123" });
+        expect((await request(app()).get("/api/playlist")).body).toEqual(saved.body);
+
+        expect((await request(app()).delete("/api/playlist")).status).toBe(204);
+        expect((await request(app()).get("/api/playlist")).body).toBeNull();
+      });
+
+      it("rejects non-YouTube playlist input", async () => {
+        const res = await request(app()).put("/api/playlist").send({ playlistUrl: "https://example.com/music" });
+        expect(res.status).toBe(400);
+        expect(res.body.error.code).toBe("invalid_request");
+      });
     });
   });
 
@@ -455,6 +477,9 @@ describe("API when the database misbehaves", () => {
       remove: () => Promise.reject(error),
       stats: () => Promise.reject(error),
       ping: () => Promise.reject(error),
+      getPlaylist: () => Promise.reject(error),
+      savePlaylist: () => Promise.reject(error),
+      removePlaylist: () => Promise.reject(error),
     });
 
     const timeout = await request(createApp({ getStore: async () => failing(new Error("Query read timeout")) })).get(

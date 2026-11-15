@@ -28,6 +28,7 @@ import { Background } from "./Background";
 import { Brand } from "./Brand";
 import { Controls, primaryActionFor, type PrimaryAction } from "./Controls";
 import { HistorySheet } from "./HistorySheet";
+import { MusicPlayer } from "./MusicPlayer";
 import { SessionName } from "./SessionName";
 import { SettingsSheet } from "./SettingsSheet";
 import { StatsDock } from "./StatsDock";
@@ -431,7 +432,10 @@ function Shell() {
         </main>
 
         <footer className="flex shrink-0 justify-center px-3 pt-1 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:pb-7 compact:pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          <StatsDock delay={0.55} />
+          <div className="flex w-full max-w-xl flex-col items-center gap-3">
+            <MusicPlayer />
+            <StatsDock delay={0.55} />
+          </div>
         </footer>
       </div>
 

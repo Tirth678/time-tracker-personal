@@ -7,6 +7,7 @@ import {
   TIMER_MODES,
   type StudySession,
 } from "../lib/types";
+import { parseYouTubePlaylistId } from "../lib/youtube";
 import { HttpError } from "./errors";
 
 /** Most sessions accepted by a single POST /api/sessions request. */
@@ -83,6 +84,22 @@ export const listSessionsQuerySchema = z.object({
 
 export const statsQuerySchema = z.object({
   todayStart: instant.optional(),
+});
+
+export const playlistSchema = z.object({
+  playlistUrl: z
+    .string()
+    .trim()
+    .min(1)
+    .max(2048)
+    .transform((value, ctx) => {
+      const playlistId = parseYouTubePlaylistId(value);
+      if (!playlistId) {
+        ctx.addIssue({ code: "custom", message: "Enter a YouTube playlist URL or playlist id." });
+        return z.NEVER;
+      }
+      return playlistId;
+    }),
 });
 
 export const sessionIdSchema = z.uuid();

@@ -102,6 +102,9 @@ export async function startLiveApi(): Promise<LiveApi> {
       sessions: wrap("sessions"),
       saveSessions: wrap("saveSessions"),
       deleteSession: wrap("deleteSession"),
+      playlist: wrap("playlist"),
+      savePlaylist: wrap("savePlaylist"),
+      deletePlaylist: wrap("deletePlaylist"),
     },
     calls,
     store,
@@ -125,7 +128,7 @@ export async function startLiveApi(): Promise<LiveApi> {
     },
     async reset() {
       await idle();
-      await db.query("TRUNCATE study_sessions");
+      await db.query("TRUNCATE study_sessions, music_playlist");
       database = "connected";
       online = true;
       holds.clear();

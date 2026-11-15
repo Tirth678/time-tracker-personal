@@ -8,6 +8,7 @@ import {
   listSessionsQuerySchema,
   parseOrThrow,
   saveSessionsSchema,
+  playlistSchema,
   sessionIdSchema,
   statsQuerySchema,
 } from "./validation";
@@ -68,6 +69,21 @@ export function createApp({ getStore }: AppDependencies): Express {
       status = { ok: false, database: "unreachable", cause: errorCode(err) };
     }
     res.status(status.ok ? 200 : 503).json(status);
+  });
+
+  api.get("/playlist", async (_req, res) => {
+    res.json(await withStore((store) => store.getPlaylist()));
+  });
+
+  api.put("/playlist", async (req, res) => {
+    const { playlistUrl } = parseOrThrow(playlistSchema, req.body);
+    res.json(await withStore((store) => store.savePlaylist(playlistUrl)));
+  });
+
+  api.delete("/playlist", async (_req, res) => {
+    const removed = await withStore((store) => store.removePlaylist());
+    if (!removed) throw new HttpError(404, "not_found", "No playlist is configured.");
+    res.status(204).end();
   });
 
   api.get("/stats", async (req, res) => {

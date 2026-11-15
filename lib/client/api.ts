@@ -1,6 +1,7 @@
 import type {
   ApiErrorBody,
   HealthStatus,
+  MusicPlaylist,
   SaveSessionsResult,
   SessionPage,
   StudySession,
@@ -30,6 +31,9 @@ export interface TrackerApi {
   sessions(options: { limit: number; cursor?: string }): Promise<SessionPage>;
   saveSessions(sessions: StudySession[]): Promise<SaveSessionsResult>;
   deleteSession(id: string): Promise<void>;
+  playlist(): Promise<MusicPlaylist | null>;
+  savePlaylist(playlistUrl: string): Promise<MusicPlaylist>;
+  deletePlaylist(): Promise<void>;
 }
 
 const TIMEOUT_MS = 20_000;
@@ -90,5 +94,8 @@ export function createApi(baseUrl = ""): TrackerApi {
     saveSessions: (sessions) => request("/api/sessions", { method: "POST", body: JSON.stringify({ sessions }) }),
 
     deleteSession: (id) => request(`/api/sessions/${encodeURIComponent(id)}`, { method: "DELETE" }),
+    playlist: () => request("/api/playlist"),
+    savePlaylist: (playlistUrl) => request("/api/playlist", { method: "PUT", body: JSON.stringify({ playlistUrl }) }),
+    deletePlaylist: () => request("/api/playlist", { method: "DELETE" }),
   };
 }

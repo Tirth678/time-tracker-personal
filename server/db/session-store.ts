@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { SessionPage, StudySession, StudyStats } from "../../lib/types";
+import type { MusicPlaylist, SessionPage, StudySession, StudyStats } from "../../lib/types";
 import { HttpError } from "../errors";
 import type { Db, Row } from "./client";
 
@@ -12,6 +12,9 @@ export interface SessionStore {
   remove(id: string): Promise<boolean>;
   stats(todayStart?: string): Promise<StudyStats>;
   ping(): Promise<void>;
+  getPlaylist(): Promise<MusicPlaylist | null>;
+  savePlaylist(playlistId: string): Promise<MusicPlaylist>;
+  removePlaylist(): Promise<boolean>;
 }
 
 /*
@@ -153,6 +156,26 @@ export function createSessionStore(db: Db): SessionStore {
 
     async ping() {
       await db.query("SELECT 1");
+    },
+
+    async getPlaylist() {
+      const [row] = await db.query("SELECT playlist_id FROM music_playlist WHERE id = 1");
+      return row ? { playlistId: String(row.playlist_id) } : null;
+    },
+
+    async savePlaylist(playlistId) {
+      await db.query(
+        `INSERT INTO music_playlist (id, playlist_id)
+         VALUES (1, $1::text)
+         ON CONFLICT (id) DO UPDATE SET playlist_id = EXCLUDED.playlist_id, updated_at = now()`,
+        [playlistId],
+      );
+      return { playlistId };
+    },
+
+    async removePlaylist() {
+      const deleted = await db.query("DELETE FROM music_playlist WHERE id = 1 RETURNING id");
+      return deleted.length > 0;
     },
   };
 }

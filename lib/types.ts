@@ -69,6 +69,10 @@ export interface HealthStatus {
   cause?: string;
 }
 
+export interface MusicPlaylist {
+  playlistId: string;
+}
+
 /** Shape of every other non-2xx JSON response from the API. */
 export interface ApiErrorBody {
   error: {
