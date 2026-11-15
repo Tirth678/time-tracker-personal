@@ -1,0 +1,224 @@
+@import "tailwindcss";
+
+/*
+ * Two variants for screens without much height, so that the timer, its buttons
+ * and the totals fit without scrolling wherever that is possible.
+ *
+ * compact: little height of either kind (a small phone with the browser's
+ *          toolbars showing, or one of the screens below). Tighter spacing.
+ * short:   wide but low (a phone on its side, a laptop window). The ring moves
+ *          to the left and everything else sits beside it.
+ *
+ * `short` is declared last, so that it wins where both apply.
+ */
+@custom-variant compact {
+  @media (max-height: 639px), (max-height: 779px) and (min-aspect-ratio: 5/4) {
+    @slot;
+  }
+}
+@custom-variant short (@media (max-height: 779px) and (min-aspect-ratio: 5/4));
+
+@theme {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: var(--font-instrument), "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+
+  --color-ink: #060a14;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+
+  --animate-drift-a: drift-a 38s ease-in-out infinite alternate;
+  --animate-drift-b: drift-b 52s ease-in-out infinite alternate;
+  --animate-drift-c: drift-c 64s ease-in-out infinite alternate;
+  --animate-orbit: orbit 60s linear infinite;
+  --animate-breathe: breathe 2.6s ease-in-out infinite;
+
+  @keyframes drift-a {
+    from {
+      transform: translate3d(-12%, -8%, 0) scale(1);
+    }
+    to {
+      transform: translate3d(14%, 10%, 0) scale(1.18);
+    }
+  }
+  @keyframes drift-b {
+    from {
+      transform: translate3d(10%, 12%, 0) scale(1.12);
+    }
+    to {
+      transform: translate3d(-14%, -10%, 0) scale(0.94);
+    }
+  }
+  @keyframes drift-c {
+    from {
+      transform: translate3d(-6%, 14%, 0) scale(0.96);
+    }
+    to {
+      transform: translate3d(10%, -12%, 0) scale(1.14);
+    }
+  }
+  @keyframes orbit {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes breathe {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+}
+
+/* In the base layer, so that utility classes on an element can override these. */
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    height: 100%;
+    background: var(--color-ink);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100%;
+    color: #fff;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  ::selection {
+    background: rgb(255 255 255 / 0.22);
+  }
+
+  /* One consistent, clearly visible focus style for keyboard users. */
+  :focus-visible {
+    outline: 2px solid rgb(255 255 255 / 0.9);
+    outline-offset: 3px;
+  }
+
+  button,
+  [role="radio"],
+  [role="switch"] {
+    cursor: pointer;
+  }
+}
+
+/* Frosted panels that stay legible over any picture or video. */
+@utility glass {
+  background-color: rgb(12 16 26 / 0.42);
+  border: 1px solid rgb(255 255 255 / 0.11);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.07),
+    0 18px 50px -20px rgb(0 0 0 / 0.6);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  backdrop-filter: blur(22px) saturate(140%);
+}
+
+/* Text placed directly on the background needs help on bright pictures. */
+@utility on-media {
+  text-shadow:
+    0 1px 2px rgb(0 0 0 / 0.28),
+    0 10px 40px rgb(0 0 0 / 0.38);
+}
+
+/* Fine film grain: adds texture and hides banding in the dark gradients. */
+@utility grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+
+/* A range input drawn as a hairline with a round handle. */
+@utility slider {
+  appearance: none;
+  height: 1.5rem;
+  background: transparent;
+  cursor: pointer;
+
+  &::-webkit-slider-runnable-track {
+    height: 2px;
+    border-radius: 1px;
+    background: linear-gradient(
+      to right,
+      rgb(255 255 255 / 0.9) var(--fill, 0%),
+      rgb(255 255 255 / 0.18) var(--fill, 0%)
+    );
+  }
+  &::-moz-range-track {
+    height: 2px;
+    border-radius: 1px;
+    background: rgb(255 255 255 / 0.18);
+  }
+  &::-moz-range-progress {
+    height: 2px;
+    border-radius: 1px;
+    background: rgb(255 255 255 / 0.9);
+  }
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    margin-top: -6px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 6px rgb(0 0 0 / 0.4);
+    transition: transform 0.2s var(--ease-out-quart);
+  }
+  &::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 6px rgb(0 0 0 / 0.4);
+  }
+  &:active::-webkit-slider-thumb {
+    transform: scale(1.25);
+  }
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+/* Thin, unobtrusive scrollbars inside the panels. */
+@utility scroll-quiet {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.18) transparent;
+}
+
+/* Number inputs without the browser's spin buttons. */
+/* A scrolling row without a scrollbar (the content fades out at the edges instead). */
+@utility scroll-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility no-spinner {
+  appearance: textfield;
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
