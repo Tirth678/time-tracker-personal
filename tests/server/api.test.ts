@@ -58,10 +58,27 @@ describe.each(TEST_BACKENDS)("API on $name", ({ create }) => {
         expect((await request(app()).get("/api/playlist")).body).toBeNull();
       });
 
+      it("accepts a video URL when it includes the playlist id", async () => {
+        const res = await request(app())
+          .put("/api/playlist")
+          .send({ playlistUrl: "https://www.youtube.com/watch?v=lTRiuFIWV54&list=PL_focus_music_123" });
+
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual({ playlistId: "PL_focus_music_123" });
+      });
+
       it("rejects non-YouTube playlist input", async () => {
         const res = await request(app()).put("/api/playlist").send({ playlistUrl: "https://example.com/music" });
         expect(res.status).toBe(400);
         expect(res.body.error.code).toBe("invalid_request");
+      });
+
+      it("accepts a standalone YouTube video URL", async () => {
+        const res = await request(app()).put("/api/playlist").send({
+          playlistUrl: "https://www.youtube.com/watch?v=lTRiuFIWV54",
+        });
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual({ playlistId: "video:lTRiuFIWV54" });
       });
     });
   });

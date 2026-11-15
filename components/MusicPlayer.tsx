@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { ApiError, createApi } from "@/lib/client/api";
 import type { MusicPlaylist } from "@/lib/types";
-import { parseYouTubePlaylistId } from "@/lib/youtube";
+import { isYouTubeVideoReference, parseYouTubePlaylistId, VIDEO_REFERENCE_PREFIX } from "@/lib/youtube";
 
 import { IconButton } from "./ui";
 
@@ -49,7 +49,7 @@ export function MusicPlayer() {
     event.preventDefault();
     const playlistId = parseYouTubePlaylistId(draft);
     if (!playlistId) {
-      setError("Paste a YouTube playlist URL or playlist id.");
+      setError("Paste a YouTube playlist URL, YouTube video URL, or playlist id.");
       return;
     }
 
@@ -111,9 +111,16 @@ export function MusicPlayer() {
   }
 
   const origin = typeof window === "undefined" ? "" : window.location.origin;
-  const embedUrl = `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(
-    playlist.playlistId,
-  )}&enablejsapi=1&origin=${encodeURIComponent(origin)}&controls=0&rel=0`;
+  const mediaId = isYouTubeVideoReference(playlist.playlistId)
+    ? playlist.playlistId.slice(VIDEO_REFERENCE_PREFIX.length)
+    : null;
+  const embedUrl = mediaId
+    ? `https://www.youtube.com/embed/${encodeURIComponent(mediaId)}?enablejsapi=1&origin=${encodeURIComponent(
+        origin,
+      )}&controls=0&rel=0`
+    : `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(
+        playlist.playlistId,
+      )}&enablejsapi=1&origin=${encodeURIComponent(origin)}&controls=0&rel=0`;
 
   return (
     <div className="glass w-full max-w-xl overflow-hidden rounded-3xl">
